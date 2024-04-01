@@ -1,0 +1,102 @@
+pipeline {
+    agent any
+    tools {
+      git 'git'
+      maven 'maven3'
+        }
+        environment {
+        SCANNER_HOME=tool 'sonar-scanner'
+    }
+    stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('git checkout') {
+            steps {
+               git branch: 'main', url: 'https://github.com/praveenakumara/hello_world_public_war.git' 
+            }
+        }
+        stage('Maven compile') {
+            steps {
+                sh "mvn compile"
+            }
+        }
+        stage(" Unit test") {
+            steps {
+                sh "mvn test"
+            }
+        }
+        stage("Sonarqube analysis") {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=hello-world \
+                    -Dsonar.java.binaries=. \
+                    -Dsonar.projectKey=hello-world '''}
+            }
+        }
+        stage("Maven Build") {
+            steps {
+                sh " mvn clean package"
+                sh "sudo mv /var/lib/jenkins/workspace/hello-world/webapp/target/webapp.war webapp-${BUILD_NUMBER}.war"
+            }
+        }
+        stage('Upload Binary To Jfrog_1') {
+            steps {
+               rtUpload (
+                    serverId: 'jfrog_web',
+                    spec: '''{
+                          "files": [
+                            {
+                              "pattern": "webapp-${BUILD_NUMBER}.war",
+                              "target": "hello-world-libs-release-local"
+                            }
+                         ]
+                    }''',)
+            }
+        }
+        // stage('deploy to tomcat') {
+        //     steps {
+                
+        //         // deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://3.101.42.21:8080/')], contextPath: 'hello_war', war: '**/*war'
+        //             sh ''' chmod 400 terraform_ohio.pem
+        //             ansiblePlaybook become: true, credentialsId: 'tomcat', disableHostKeyChecking: true, inventory: 'host.ini', playbook: 'tomcatDeploy.yml', vaultTmpPath: ''
+        //             // ansible-playbook tomcatDeploy.yml -i hosts.ini --private-key terraform_ohio.pem -u ubuntu
+        //             // ansible-playbook -i hosts.ini -m  --private-key terraform_ohio.pem -u ubuntu
+
+        //             '''
+        //     }
+        // }
+        stage("Deploy to tomcat") {
+            steps {
+                sh "chmod 400 terraform_ohio.pem"
+                sh " ansible -i hosts.ini -m ping all --private-key terraform_ohio.pem -u ubuntu"
+                sh '''ansible-playbook -i hosts.ini tomcatDeploy.yml --private-key terraform_ohio.pem -u ubuntu -e "BUILD_NUMBER=${BUILD_NUMBER}" '''
+                // sh '''chmod 400 terraform_ohio.pem
+                // ansible-playbook tomcatDeploy.yml -i hosts.ini --private-key terraform_ohio.pem -u ubuntu -e "BUILD_NUMBER=${ BUILD_NUMBER }"
+                // '''
+            }
+        }
+        stage("docker images") {
+            steps {
+                sh "docker build -t testimage -f Dockerfile ."
+            }
+        }
+        stage("push image to jfrog") {
+            steps {
+                sh "docker tag testimage naik.jfrog.io/mydocker-docker-local/testimage:v${BUILD_NUMBER}"
+                withCredentials([usernamePassword(credentialsId: 'docker_jfrog', passwordVariable: 'pass', usernameVariable: 'user')]) {
+                sh "docker login -u ${user} -p ${pass} naik.jfrog.io"
+                sh " docker push naik.jfrog.io/mydocker-docker-local/testimage:v${BUILD_NUMBER}"
+                    }
+            }
+        }
+        stage("docker deploy") {
+            steps {
+                sh "chmod 400 terraform_ohio.pem"
+                sh '''ansible-playbook -i hosts.ini deploywithDocker.yml --private-key terraform_ohio.pem -u ubuntu -e "BUILD_NUMBER=${BUILD_NUMBER}" '''
+            }
+        }
+    }
+}
