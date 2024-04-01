@@ -3,7 +3,7 @@
   become: yes
   vars:
     build_number: '{{ BUILD_NUMBER }}'
-  become_user: tomcat
+  # become_user: tomcat
   tasks:
 
   - name: create directory 
@@ -19,6 +19,7 @@
       dest: /home/tomcat/sourcefile/webapp.war
       username: praveenaik009@gmail.com
       password: Praveen009
+      mode: '0644'
 
   # - name: create directory with a date in name
   #   file: 
