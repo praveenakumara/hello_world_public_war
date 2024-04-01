@@ -9,12 +9,12 @@
       shell: docker login -u praveenaik009@gmail.com -p Praveen009 naik.jfrog.io   
     
     - name: pull an image
-      shell: docker pull naik.jfrog.io/mydocker-docker-local/testimage:v${BUILD_NUMBER}
+      shell: docker pull naik.jfrog.io/mydocker-docker-local/testimage:v{{ BUILD_NUMBER }}
 
     # - name: remove container
     #   shell: docker rm -f devopsAppDeploy
         
     - name: create a application container
-      shell: docker run -id --name devopsAppDeploy -p 8111:8080 naik.jfrog.io/mydocker-docker-local/testimage:v${BUILD_NUMBER}
+      shell: docker run -id --name devopsAppDeploy -p 8111:8080 naik.jfrog.io/mydocker-docker-local/testimage:v{{ BUILD_NUMBER }}
  
    
