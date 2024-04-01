@@ -1,0 +1,12 @@
+- hosts: websever
+  become: true
+  vars:
+    build_number: '{{ BUILD_NUMBER }}'
+  # become_user: tomcat
+  tasks:
+
+  - name: create directory 
+    file:
+      path: /home/tomcat/sourcefile
+      state: directory
+      mode: 0777
