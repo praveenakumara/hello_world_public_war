@@ -1,6 +1,6 @@
 ---
 - hosts: websever
-  become: yes
+  become: true
   vars:
     build_number: '{{ BUILD_NUMBER }}'
   # become_user: tomcat
