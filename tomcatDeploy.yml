@@ -3,7 +3,7 @@
   become: true
   vars:
     build_number: '{{ BUILD_NUMBER }}'
-  # become_user: tomcat
+  become_user: tomcat
   tasks:
 
   - name: create directory 
