@@ -1,5 +1,5 @@
 ---
-- hosts: websever
+- hosts: docker
   become: yes
   vars:
     build_number: '{{ BUILD_NUMBER }}'
