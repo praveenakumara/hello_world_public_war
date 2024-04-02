@@ -15,6 +15,6 @@
     #   shell: docker rm -f devopsAppDeploy
         
     - name: create a application container
-      shell: docker run -id --name devopsAppDeploy -p 8111:8080 naik.jfrog.io/mydocker-docker-local/testimage:v{{ BUILD_NUMBER }}
+      shell: docker run -id --name devopsAppDeploy -p 81${BUILD_NUMBER}:8080 naik.jfrog.io/mydocker-docker-local/testimage:v{{ BUILD_NUMBER }}
  
    
