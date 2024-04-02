@@ -51,13 +51,6 @@ spec:
         image: naik.jfrog.io/artifactory/mydocker-docker-local/testimage:${BUILD_NUMBER}
         ports:
         - containerPort: 8080
-        volumeMounts:
-            - name: docker-config
-              mountPath: /docker-config
-            - name: docker-config
-              mountPath: /docker-config  
-              readOnly: true
-      volumes:
-        - name: docker-config
-          configMap:
-            name: docker-config
+        envFrom:
+          - configMapRef:
+              name: docker-config
