@@ -14,6 +14,22 @@ spec:
       # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
       #nodePort: 30007
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docker-config
+data:
+  config.json: |
+    {
+      "auths": {
+        "https://naik.jfrog.io": {
+          "username": "praveenaik009@gmail.com",
+          "password": "Praveen009",
+          "auth": "cHJhdmVuYWlrMDA5QGdtYWlsLmNvbTpQcmF2ZWVuMDA5"
+        }
+      }
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +48,13 @@ spec:
     spec:
       containers:
       - name: devopsapp
-        image: shstechacademymay23.jfrog.io/docker-test/app-a/hello_world_public_war:1
+        image: naik.jfrog.io/artifactory/mydocker-docker-local/testimage:${BUILD_NUMBER}
         ports:
         - containerPort: 8080
+        volumes:
+        - name: docker-config-volume
+          configMap:
+            name: docker-config
+      env:
+        - name: DOCKER_CONFIG
+          value: /docker-config
