@@ -52,7 +52,7 @@ spec:
         ports:
         - containerPort: 8080
         volumeMounts:
-            - name: mosquitto-conf
+            - name: docker-config
               mountPath: /docker-config
             - name: docker-config
               mountPath: /docker-config  
