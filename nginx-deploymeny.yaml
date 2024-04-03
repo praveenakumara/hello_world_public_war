@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
       - name: devopsapp
-        image: naik.jfrog.io/artifactory/mydocker-docker-local/testimage:${BUILD_NUMBER}
+        image: naik.jfrog.io/artifactory/mydocker-docker-local/testimage:v90
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
